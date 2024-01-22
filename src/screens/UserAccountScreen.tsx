@@ -1,10 +1,49 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, StatusBar, Image} from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  StatusBar,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import {COLORS, FONTFAMILY, FONTSIZE, SPACING} from '../theme/theme';
 import AppHeader from '../components/AppHeader';
 import SettingComponent from '../components/SettingComponent';
+import {auth} from '../../firebase/firebase.config';
+import {signOut} from 'firebase/auth';
 
 const UserAccountScreen = ({navigation}: any) => {
+  const [first, setfirst] = React.useState('');
+  const logout = () => {
+    signOut(auth)
+      .then(() => {
+        navigation.navigate('Login');
+      })
+      .catch(error => {});
+  };
+
+  React.useEffect(() => {
+    const getUserName = () => {
+      const user = auth.currentUser;
+      if (user !== null) {
+        // The user object has basic properties such as display name, email, etc.
+        const displayName = user.displayName ?? '';
+        const email = user.email ?? '';
+        setfirst(email);
+        const photoURL = user.photoURL;
+        const emailVerified = user.emailVerified;
+
+        // The user's ID, unique to the Firebase project. Do NOT use
+        // this value to authenticate with your backend server, if
+        // you have one. Use User.getToken() instead.
+        const uid = user.uid;
+      }
+    };
+
+    getUserName();
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
@@ -21,7 +60,7 @@ const UserAccountScreen = ({navigation}: any) => {
           source={require('../assets/image/avatar.png')}
           style={styles.avatarImage}
         />
-        <Text style={styles.avatarText}>John Doe</Text>
+        <Text style={styles.avatarText}>{first}</Text>
       </View>
 
       <View style={styles.profileContainer}>
@@ -37,18 +76,10 @@ const UserAccountScreen = ({navigation}: any) => {
           subheading="Theme"
           subtitle="Permissions"
         />
-        <SettingComponent
-          icon="dollar"
-          heading="Offers & Refferrals"
-          subheading="Offer"
-          subtitle="Refferrals"
-        />
-        <SettingComponent
-          icon="info"
-          heading="About"
-          subheading="About Movies"
-          subtitle="more"
-        />
+
+        <TouchableOpacity onPress={() => logout()}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -74,6 +105,12 @@ const styles = StyleSheet.create({
     borderRadius: 80,
   },
   avatarText: {
+    fontFamily: FONTFAMILY.poppins_medium,
+    fontSize: FONTSIZE.size_16,
+    marginTop: SPACING.space_16,
+    color: COLORS.White,
+  },
+  logoutText: {
     fontFamily: FONTFAMILY.poppins_medium,
     fontSize: FONTSIZE.size_16,
     marginTop: SPACING.space_16,

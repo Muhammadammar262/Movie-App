@@ -6,6 +6,8 @@ import {
   StatusBar,
   ImageBackground,
   Image,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import AppHeader from '../components/AppHeader';
@@ -21,6 +23,14 @@ import CustomIcon from '../components/CustomIcon';
 
 const TicketScreen = ({navigation, route}: any) => {
   const [ticketData, setTicketData] = useState<any>(route.params);
+  const clearTicket = async () => {
+    try {
+      await EncryptedStorage.removeItem('ticket');
+      setTicketData(null);
+    } catch (error) {
+      console.error('Error clearing ticket', error);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -50,9 +60,17 @@ const TicketScreen = ({navigation, route}: any) => {
             action={() => navigation.goBack()}
           />
         </View>
+        {ticketData && (
+          <TouchableWithoutFeedback onPress={clearTicket}>
+            <View style={styles.clearButton}>
+              <Text style={styles.clearButtonText}>Clear Ticket</Text>
+            </View>
+          </TouchableWithoutFeedback>
+        )}
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
@@ -132,11 +150,28 @@ const TicketScreen = ({navigation, route}: any) => {
           />
         </View>
       </View>
+      <TouchableOpacity
+        style={styles.clearButton}
+        onPress={clearTicket} // Function to clear the ticket
+      >
+        <Text style={styles.clearButtonText}>Clear Ticket</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  clearButton: {
+    backgroundColor: COLORS.Grey, // Example color
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  clearButtonText: {
+    color: COLORS.White,
+    fontSize: FONTSIZE.size_16,
+  },
   container: {
     display: 'flex',
     flex: 1,
